@@ -10,3 +10,6 @@ Revision history for Perl extension Sys::HostIP.
 1.2.2 Thu Jan  9 12:46:59 PST 2003
 	fixed error with || precedence on line 24 that spit out a warning for non linux systems	(thanks saad@docisland.org and nipotan@k5.dion.ne.jp)
 	changed default ifconfig command to include "-a" flag
+1.3.0 Mon Sep 29 00:42::55 PST 2003
+	finally rewrote _get_win32_interface_info from scratch. All methods seem to work now. $/ is now localized before every system call (thanks martin.thurn@ngc.com). added aix support (thanks benny@discoveringmontana.com).
+	

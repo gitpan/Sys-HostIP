@@ -1,15 +1,12 @@
 package Sys::HostIP;
-
 use strict;
 use warnings;
 use Carp;
-use Data::Dumper;
 use Exporter;
-use Sys::Hostname;
 use vars qw($VERSION @ISA @EXPORT);
-$VERSION = '1.2.2';
+$VERSION = '1.3';
 @ISA = qw(Exporter);
-@EXPORT = qw(ip);
+@EXPORT = qw(ip ips interfaces ifconfig);
 
 {
   #cache value, except when a new value is specified
@@ -23,11 +20,13 @@ $VERSION = '1.2.2';
       # do nothing, since we're keeping the cached value
     } elsif ($^O =~ /(linux|openbsd|freebsd|netbsd|solaris|darwin)/) {
       $ifconfig =  '/sbin/ifconfig -a';
+    } elsif ($^O eq 'aix') {
+      $ifconfig = '/usr/sbin/ifconfig -a';
     } elsif  ($^O eq 'irix') {
       $ifconfig = '/usr/etc/ifconfig';
     } else {
-      carp "Unknown system, guessing ifconfig lives in /sbin/ifconfig (email bluelines\@divisionbyzero.com with your system info)\n";
-      $ifconfig = '/sbin/ifconfig';
+      carp "Unknown system ($^O), guessing ifconfig lives in /sbin/ifconfig (email bluelines\@divisionbyzero.com with your system info)\n";
+      $ifconfig = '/sbin/ifconfig -a';
     }
     return $ifconfig;
   }
@@ -41,28 +40,37 @@ sub ip {
 
 sub ips {
   my ($class) = @_;
+  $class = "Sys::HostIP" unless defined $class;
   return $class->_get_interface_info(mode => 'ips');
 }
 
 sub interfaces {
   my ($class) = @_;
+  $class = "Sys::HostIP" unless defined $class;
   return $class->_get_interface_info(mode => 'interfaces');
 }
 
 sub _get_interface_info {
   my ($class, %params) = @_;
-  if ($^O eq 'MSWin32') {
-    #this will change once i can get a win32 machine to fix this code. right
-    #now, none of the modes work in win32. we just return the (hopefully)
-    #main ip address. anyone want to work on this?
-    return $class->_get_win32_interface_info();
+  my $if_info = {};
+  if ($^O =~/(MSWin32|cygwin)/) {
+    $if_info = $class->_get_win32_interface_info();
   } else {
-    my $if_info = $class->_get_unix_interface_info();
-    if ($params{mode} eq 'interfaces') {
-      return $if_info;
-    } elsif ( $params{mode} eq 'ips') {
-      return [values %$if_info];
-    } elsif ( $params{mode} eq 'ip') {
+    $if_info = $class->_get_unix_interface_info();
+  }
+  if ($params{mode} eq 'interfaces') {
+    return $if_info;
+  } elsif ( $params{mode} eq 'ips') {
+    return [values %$if_info];
+  } elsif ( $params{mode} eq 'ip') {
+    if ($^O =~/(MSWin32|cygwin)/) {
+      foreach my $key (sort keys %$if_info) {
+	#should this be the default?
+	if ($key=~/Local Area Connection/) {
+	  return ($if_info->{$key});
+	} 
+      }
+    } else {
       foreach my $key (sort keys %$if_info) {
 	#we don't want the loopback
 	next if ($if_info->{$key} eq '127.0.0.1');
@@ -83,14 +91,15 @@ sub _get_unix_interface_info {
   local %ENV;
   # $BASH_ENV must be unset to pass tainting problems if your system uses
   # bash as /bin/sh
-  if ($ENV{'BASH_ENV'}) {
+  if (exists $ENV{'BASH_ENV'} and defined $ENV{'BASH_ENV'}) {
     $ENV{'BASH_ENV'} = undef;
   }
   #now we set the local $ENV{'PATH'} to be only the path to ifconfig
-  #  my $newpath = $ifconfigLocation{$^O};
   my ($newpath)  = ( $class->ifconfig =~/(\/\w+)(?:\s\S+)$/) ;
   $ENV{'PATH'} = $newpath;
   my $ifconfig = $class->ifconfig;
+  # make sure nothing else has touched $/
+  local $/ = "\n";
   my @ifconfig = `$ifconfig`;
   foreach my $line (@ifconfig) {
     #output from 'ifconfig -a' looks something like this on every *nix i
@@ -140,7 +149,7 @@ sub _get_unix_interface_info {
       #now we want to get rid of all the other crap in the ifconfig
       #output. we just want the ip address. perhaps a future version can
       #return even more useful results (netmask, etc).....
-      if (my ($ip) = ($if_info{$key} =~/inet (?:addr\:)?(\d+\.\d+\.\d+\.\d+)/)) {
+      if (my ($ip) = ($if_info{$key} =~/inet (?:addr\:)?(\d+(?:\.\d+){3})/)) {
 	$if_info{$key} = $ip;
       }
       else {
@@ -156,50 +165,31 @@ sub _get_unix_interface_info {
   #used, and we don't care about those
   return \%if_info;
 } 
-sub _get_win32_interface_info {
-  #this is shamefully stolen from the original Sys::HostIP. I've got to find
-  # a win32 machine to test and clean this up on, but for the time being
-  # we'll just use it (since i assume it works already).
-  #
-  my ($class) = @_;
-  #begin code that i didn't write:
-  #
-  #check ipconfig.exe (Whichdoes all the work of checking the registry,
-  #probably more efficiently than I could.)
-  my $nocannon= (split /\./, (my $cannon = hostname))[0];
-  my $ip;
-  return $ip= $1 if `ipconfig`=~ /(\d+\.\d+\.\d+\.\d+)/;
-  
-  # check nbtstat.exe 
-  # (Which does all the work of checking WINS,
-  # more easily than Win32::AdminMisc::GetHostAddress().)
-  return $ip= $1 if `nbtstat -a $nocannon`=~ /(\d+\.\d+\.\d+\.\d+)/;
-  
-  # check /etc/hosts entries 
-  if(open HOST, "<$ENV{SystemRoot}\\System32\\drivers\\etc\\hosts")
-    {
-      while(<HOST>)
-	{
-	  last if /\b$cannon\b/i and /(\d+\.\d+\.\d+\.\d+)/ and $ip= $1;
-	}
-      close HOST;
-      return $ip if $ip;
-    }
-  
-  # check /etc/lmhosts entries 
-  # (It will only be here if the file has been modified since the
-  # last WINS refresh, which is unlikely, but might as well try.)
-  if(open HOST, "<$ENV{SystemRoot}\\System32\\drivers\\etc\\lmhosts")
-    {
-      while(<HOST>)
-	{
-	  last if /\b$nocannon\b/i and /(\d+\.\d+\.\d+\.\d+)/ and $ip= $1;
-	}
-      close HOST;
-      return $ip if $ip;
-    }
-}
 
+sub _get_win32_interface_info {
+  my ($class) = @_;
+  my %if_info;
+  my ($line, $interface)= undef;
+  local $/ = "\r\n";
+  my @ipconfig = `ipconfig`;
+  foreach my $line (@ipconfig) {
+    chomp($line);
+    if ($line =~/^Windows IP Configuration/) {
+      #ignore the header
+      next;
+    } elsif ($line =~/^\s$/) {
+      next;
+    } elsif ( 
+	     ($line =~/\s+IP Address.*:\s+(\d+(?:\.\d+){3})/) and $interface) {
+      $if_info{$interface} = $1;
+      $interface = undef;
+    } elsif ($line =~/^Ethernet adapter\s+(.*):/) {
+      $interface = $1;
+      chomp($interface);
+    }
+  }
+  return \%if_info;
+}
 
 1;
 __END__
@@ -237,18 +227,13 @@ Sys::HostIP - Try extra hard to get ip address related info
 =head1 DESCRIPTION
 
 Sys::HostIP does what it can to determine the ip address of your
-machine. All 3 methods work fine on every *nix that I've been able to test
+machine. All 3 methods work fine on every system that I've been able to test
 on. (Irix, OpenBSD, FreeBSD, NetBSD, Solaris, Linux, OSX). It does this by
-parsing ifconfig(8) output. Unfortunately, I have no access to a Win32
-machine, so this code is leftover from the old (1.0) version of this code
-(which i did not write) and thus, only the ip() method is trully implemented
-(*hint* patches are welcome).
+parsing ifconfig(8) (ipconfig on Win32/Cygwin) output. 
 
 =head2 EXPORT
 
-ip(), ips(), interfaces(), and ifconfig(). Although this was written as a
-class, and using the class methods are preferred (I think this makes code
-much more readable).
+ip(), ips(), interfaces(), and ifconfig(). 
 
 =head1 AUTHOR
 
