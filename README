@@ -1,4 +1,4 @@
-Sys/HostIP version 0.01
+Sys/HostIP version 1.2.2
 =======================
 
 This is a rewrite of the antiquated Sys::HostIP. Sys::HostIP is now written

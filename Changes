@@ -5,3 +5,8 @@ Revision history for Perl extension Sys::HostIP.
 1.2  Sun Apr  7 21:05:23 2002
 	now ip() is exported (and works as a normal sub instead of a class
 	method) to insure compatability with old module
+1.2.1 Mon Jul  8 01:02:03 2002
+	fixed typo on line 58
+1.2.2 Thu Jan  9 12:46:59 PST 2003
+	fixed error with || precedence on line 24 that spit out a warning for non linux systems	(thanks saad@docisland.org and nipotan@k5.dion.ne.jp)
+	changed default ifconfig command to include "-a" flag

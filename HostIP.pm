@@ -7,7 +7,7 @@ use Data::Dumper;
 use Exporter;
 use Sys::Hostname;
 use vars qw($VERSION @ISA @EXPORT);
-$VERSION = "1.2.1";
+$VERSION = '1.2.2';
 @ISA = qw(Exporter);
 @EXPORT = qw(ip);
 
@@ -21,12 +21,12 @@ $VERSION = "1.2.1";
       $ifconfig = $new_ifconfig;
     } elsif (defined $ifconfig) {
       # do nothing, since we're keeping the cached value
-    } elsif ( $^O eq ('linux' || 'openbsd' || 'freebsd' || 'netbsd' || 'solaris' || 'darwin')) {
-      $ifconfig =  '/sbin/ifconfig';
+    } elsif ($^O =~ /(linux|openbsd|freebsd|netbsd|solaris|darwin)/) {
+      $ifconfig =  '/sbin/ifconfig -a';
     } elsif  ($^O eq 'irix') {
       $ifconfig = '/usr/etc/ifconfig';
     } else {
-      carp "Unknown system, guessing ifconfig lives in /sbin/ifconfig";
+      carp "Unknown system, guessing ifconfig lives in /sbin/ifconfig (email bluelines\@divisionbyzero.com with your system info)\n";
       $ifconfig = '/sbin/ifconfig';
     }
     return $ifconfig;
@@ -88,7 +88,7 @@ sub _get_unix_interface_info {
   }
   #now we set the local $ENV{'PATH'} to be only the path to ifconfig
   #  my $newpath = $ifconfigLocation{$^O};
-  my ($newpath)  = ( $class->ifconfig =~/(\/\w+)$/) ;
+  my ($newpath)  = ( $class->ifconfig =~/(\/\w+)(?:\s\S+)$/) ;
   $ENV{'PATH'} = $newpath;
   my $ifconfig = $class->ifconfig;
   my @ifconfig = `$ifconfig`;
