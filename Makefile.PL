@@ -1,32 +1,17 @@
 use ExtUtils::MakeMaker;
-
-sub MY::postamble { <<'.'; }
-
-dist_both : dist ppmdist 
-
-ppmdist : ppd pure_all
-	$(TAR) $(TARFLAGS) $(DISTNAME).ppm.tar blib
-	$(RM_RF) blib
-	$(RM_RF) pm_to_blib
-	$(COMPRESS) $(DISTNAME).ppm.tar
-.
-
+# See lib/ExtUtils/MakeMaker.pm for details of how to influence
+# the contents of the Makefile that is written.
 WriteMakefile(
-  NAME	          => 'Sys::HostIP',
-  AUTHOR          => 'v (v@rant.scriptmania.com)',
-  VERSION_FROM    => 'HostIP.pm', 
-  ABSTRACT_FROM   => 'HostIP.pm',
-  BINARY_LOCATION => 'Sys-HostIP.ppm.tar.gz',
-  PREREQ_PM       => 
-  {
-    'IO::Socket'    => 0,
-    'Sys::Hostname' => 0,
-  },
-  dist            => 
-  {
-    TAR      => 'C:\\progra~1\\util\\tar.exe',
-    TARFLAGS => 'cvf',
-    COMPRESS => 'C:\\progra~1\\util\\gzip.exe --best',
-    SUFFIX   => '.gz',
-  },
+    'NAME'		=> 'Sys::HostIP',
+    'VERSION_FROM'	=> 'HostIP.pm', # finds $VERSION
+    'PREREQ_PM'		=> { Sys::Hostname => 0}, # e.g., Module::Name => 1.1
+    ($] >= 5.005 ?    ## Add these new keywords supported since 5.005
+      (ABSTRACT_FROM => 'HostIP.pm', # retrieve abstract from module
+       AUTHOR     => 'Jonathan Schatz <bluelines@divisionbyzero.com>') : ()),
+    'LIBS'		=> [''], # e.g., '-lm'
+    'DEFINE'		=> '', # e.g., '-DHAVE_SOMETHING'
+	# Insert -I. if you add *.h files later:
+    'INC'		=> '', # e.g., '-I/usr/include/other'
+	# Un-comment this if you add C files to link with later:
+    # 'OBJECT'		=> '$(O_FILES)', # link all the C files too
 );

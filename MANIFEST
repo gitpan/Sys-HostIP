@@ -2,4 +2,5 @@ Changes
 HostIP.pm
 Makefile.PL
 MANIFEST
+README
 test.pl

@@ -1,0 +1,29 @@
+Sys/HostIP version 0.01
+=======================
+
+This is a rewrite of the antiquated Sys::HostIP. Sys::HostIP is now written
+as a class, and is now taint safe. The Win32 code is totally untested; if
+anyone wants to work on it, feel free. Also, there are many Unixes that I
+didn't have access to; any help with those platforms would be useful as
+well. Currently, I've tested this module on (Free|Net|Open)BSD, Linux, IRIX,
+Solaris, and OSX/Darwin. 
+	
+INSTALLATION
+
+To install this module type the following:
+
+   perl Makefile.PL
+   make
+   make test
+   make install
+
+DEPENDENCIES
+
+This module requires these other modules and libraries:
+
+  Sys::Hostname
+
+COPYRIGHT AND LICENCE
+
+  This is free software; You can redistribute it or modify it under the same
+ terms as Perl itself.
