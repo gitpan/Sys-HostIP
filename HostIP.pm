@@ -7,7 +7,7 @@ use Data::Dumper;
 use Exporter;
 use Sys::Hostname;
 use vars qw($VERSION @ISA @EXPORT);
-$VERSION = 1.2;
+$VERSION = "1.2.1";
 @ISA = qw(Exporter);
 @EXPORT = qw(ip);
 
@@ -55,7 +55,7 @@ sub _get_interface_info {
     #this will change once i can get a win32 machine to fix this code. right
     #now, none of the modes work in win32. we just return the (hopefully)
     #main ip address. anyone want to work on this?
-    return $class->_get_win32_inferface_info();
+    return $class->_get_win32_interface_info();
   } else {
     my $if_info = $class->_get_unix_interface_info();
     if ($params{mode} eq 'interfaces') {
@@ -161,6 +161,7 @@ sub _get_win32_interface_info {
   # a win32 machine to test and clean this up on, but for the time being
   # we'll just use it (since i assume it works already).
   #
+  my ($class) = @_;
   #begin code that i didn't write:
   #
   #check ipconfig.exe (Whichdoes all the work of checking the registry,
