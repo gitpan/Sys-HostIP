@@ -2,11 +2,7 @@ Sys/HostIP version 0.01
 =======================
 
 This is a rewrite of the antiquated Sys::HostIP. Sys::HostIP is now written
-as a class, and is now taint safe. The Win32 code is totally untested; if
-anyone wants to work on it, feel free. Also, there are many Unixes that I
-didn't have access to; any help with those platforms would be useful as
-well. Currently, I've tested this module on (Free|Net|Open)BSD, Linux, IRIX,
-Solaris, and OSX/Darwin. 
+as a class, and is now taint safe (although the ip() method is also exported as a sub to maintain compatability with older versions of this code). The Win32 code is totally untested; if anyone wants to work on it, feel free. Also, there are many Unixes that I didn't have access to; any help with those platforms would be useful as well. Currently, I've tested this module on (Free|Net|Open)BSD, Linux, IRIX, Solaris, and OSX/Darwin. 
 	
 INSTALLATION
 

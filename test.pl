@@ -14,8 +14,10 @@ ok(1); # If we made it this far, we're ok.
 
 {
   my $class = 'Sys::HostIP';
-  my $ip = $class->ip;
+  my $ip = $class->ip; #the preferred way
+  my $sub_ip = ip(); #the old way
   ok ($ip =~/^\d+\.\d+\.\d+\.\d+$/);
+  ok ($ip eq $sub_ip);
   my $ips = $class->ips;
   ok (ref($ips) eq 'ARRAY');
   ok (1 == grep /^$ip$/, @$ips);

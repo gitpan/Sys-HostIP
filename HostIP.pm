@@ -4,9 +4,12 @@ use strict;
 use warnings;
 use Carp;
 use Data::Dumper;
+use Exporter;
 use Sys::Hostname;
-use vars qw($VERSION);
-$VERSION = 1.1;
+use vars qw($VERSION @ISA @EXPORT);
+$VERSION = 1.2;
+@ISA = qw(Exporter);
+@EXPORT = qw(ip);
 
 {
   #cache value, except when a new value is specified
@@ -32,6 +35,7 @@ $VERSION = 1.1;
 
 sub ip {
   my ($class) = @_;
+  $class = "Sys::HostIP" unless defined $class;
   return $class->_get_interface_info(mode => 'ip');
 }
 
@@ -208,31 +212,42 @@ Sys::HostIP - Try extra hard to get ip address related info
 
   use Sys::HostIP; 
   
+  #class methods 
   my $ip_address = Sys::HostIP->ip; 
+
   # $ip_address is a scalar containing a best guess of your host machines ip
-  # address. It will return loopback (127.0.0.1) if it can't find anything else.
+  # address. It will return loopback (127.0.0.1) if it can't find anything
+  # else. This is also exported as a sub (to keep compatability with older versions).
 
   my $ip_addresses = Sys::HostIP->ips; 
+
   # $ip_addresses is an array ref containing all the ip addresses of your
   # machine 
 
-  my $interfaces = Sys::HostIP->interfaces;
+   my $interfaces = Sys::HostIP->interfaces;
+
   # $interfaces is a hash ref containg all pairs of interfaces/ip addresses
   # Sys::HostIP could find on your machine.
+
+  Sys::HostIP->ifconfig("/somewhere/that/ifconfig/lives");
+  # you can set the location of ifconfig with this class method if the code
+  # doesn't seem to know where your ifconfig lives
 
 =head1 DESCRIPTION
 
 Sys::HostIP does what it can to determine the ip address of your
-machine. All 3 methods work fine on every *nix that I've been able to
-test on. (Irix, OpenBSD, FreeBSD, NetBSD, Solaris, Linux, OSX)
-Unfortunately, I have no access to a Win32 machine, so this code is leftover
-from the old (1.0) version of this code (which i did not write) and thus,
-only the ip() method is trully implemented (*hint* patches are welcome).
+machine. All 3 methods work fine on every *nix that I've been able to test
+on. (Irix, OpenBSD, FreeBSD, NetBSD, Solaris, Linux, OSX). It does this by
+parsing ifconfig(8) output. Unfortunately, I have no access to a Win32
+machine, so this code is leftover from the old (1.0) version of this code
+(which i did not write) and thus, only the ip() method is trully implemented
+(*hint* patches are welcome).
 
 =head2 EXPORT
 
-Nothing, because I wrote this as a class. Classes are so much easier on the
-eyes when reading other's code, don't you think?
+ip(), ips(), interfaces(), and ifconfig(). Although this was written as a
+class, and using the class methods are preferred (I think this makes code
+much more readable).
 
 =head1 AUTHOR
 

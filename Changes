@@ -2,3 +2,6 @@ Revision history for Perl extension Sys::HostIP.
 
 1.1  Sun Apr  7 17:30:15 2002
 	almost complete rewrite of old (1.0) version
+1.2  Sun Apr  7 21:05:23 2002
+	now ip() is exported (and works as a normal sub instead of a class
+	method) to insure compatability with old module
