@@ -4,7 +4,7 @@ use ExtUtils::MakeMaker;
 WriteMakefile(
     'NAME'		=> 'Sys::HostIP',
     'VERSION_FROM'	=> 'HostIP.pm', # finds $VERSION
-    'PREREQ_PM'		=> { Sys::Hostname => 0}, # e.g., Module::Name => 1.1
+    'PREREQ_PM'		=> { }, # e.g., Module::Name => 1.1
     ($] >= 5.005 ?    ## Add these new keywords supported since 5.005
       (ABSTRACT_FROM => 'HostIP.pm', # retrieve abstract from module
        AUTHOR     => 'Jonathan Schatz <bluelines@divisionbyzero.com>') : ()),

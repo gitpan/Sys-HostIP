@@ -4,7 +4,7 @@ use warnings;
 use Carp;
 use Exporter;
 use vars qw($VERSION @ISA @EXPORT);
-$VERSION = '1.3';
+$VERSION = '1.3.1';
 @ISA = qw(Exporter);
 @EXPORT = qw(ip ips interfaces ifconfig);
 
@@ -206,16 +206,17 @@ Sys::HostIP - Try extra hard to get ip address related info
   #class methods 
   my $ip_address = Sys::HostIP->ip; 
 
-  # $ip_address is a scalar containing a best guess of your host machines ip
-  # address. It will return loopback (127.0.0.1) if it can't find anything
-  # else. This is also exported as a sub (to keep compatability with older versions).
+  # $ip_address is a scalar containing a best guess of your host machines 
+  # ip address. On unix systems, it will return loopback (127.0.0.1) if it 
+  # can't find anything else. This is also exported as a sub (to keep 
+  # compatability with older versions).
 
   my $ip_addresses = Sys::HostIP->ips; 
 
   # $ip_addresses is an array ref containing all the ip addresses of your
   # machine 
 
-   my $interfaces = Sys::HostIP->interfaces;
+  my $interfaces = Sys::HostIP->interfaces;
 
   # $interfaces is a hash ref containg all pairs of interfaces/ip addresses
   # Sys::HostIP could find on your machine.
@@ -228,8 +229,8 @@ Sys::HostIP - Try extra hard to get ip address related info
 
 Sys::HostIP does what it can to determine the ip address of your
 machine. All 3 methods work fine on every system that I've been able to test
-on. (Irix, OpenBSD, FreeBSD, NetBSD, Solaris, Linux, OSX). It does this by
-parsing ifconfig(8) (ipconfig on Win32/Cygwin) output. 
+on. (Irix, OpenBSD, FreeBSD, NetBSD, Solaris, Linux, OSX, Win32, Cygwin). It 
+does this by parsing ifconfig(8) (ipconfig on Win32/Cygwin) output. 
 
 =head2 EXPORT
 
@@ -241,12 +242,12 @@ Jonathan Schatz <bluelines@divisionbyzero.com>
 
 =head1 TODO
 
-Rewrite this via XS and ifaddrlist from Net::RawIP (although this will ruin
-portability to non-*nix systems).
+I haven't tested the win32 code with dialup or wireless connections.
 
 =head1 SEE ALSO
 
 ifconfig(8)
+ipconfig 
 
 L<perl>.
 
