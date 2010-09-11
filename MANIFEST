@@ -1,7 +1,12 @@
+Build.PL
 Changes
-HostIP.pm
-Makefile.PL
+LICENSE
 MANIFEST
+META.yml
+Makefile.PL
 README
-test.pl
-META.yml                                Module meta-data (added by MakeMaker)
+dist.ini
+lib/Sys/HostIP.pm
+t/00-compile.t
+t/base.t
+t/release-pod-syntax.t

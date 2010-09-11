@@ -1,32 +1,73 @@
-Sys/HostIP version 1.3.1
-=======================
+NAME
+    Sys::HostIP - Try extra hard to get ip address related info
 
-This is a rewrite of the antiquated Sys::HostIP. Sys::HostIP is now written
-as a class, and is now taint safe. The following methods are exported:
+VERSION
+    version 1.4
 
-	ip() - returns a "best guess" ip address (on machines with only one
-	       network interface, this returns that interfaces ip address)
-	ips() - returns an array reference of all ip addresses on a machine
-	interfaces() - returns a reference to a hash of interface:ip address 
-		pairs
+SYNOPSIS
+      use Sys::HostIP; 
+  
+      #class methods 
+      my $ip_address = Sys::HostIP->ip; 
 
-Currently, I've tested this module on (Free|Net|Open)BSD, Linux, IRIX, Solaris,
-Windows XP, Cygwin, and OSX/Darwin. 
-	
-INSTALLATION
+      # $ip_address is a scalar containing a best guess of your host machines 
+      # ip address. On unix systems, it will return loopback (127.0.0.1) if it 
+      # can't find anything else. This is also exported as a sub (to keep 
+      # compatability with older versions).
 
-To install this module type the following:
+      my $ip_addresses = Sys::HostIP->ips; 
 
-   perl Makefile.PL
-   make
-   make test
-   make install
+      # $ip_addresses is an array ref containing all the ip addresses of your
+      # machine 
 
-DEPENDENCIES
+      my $interfaces = Sys::HostIP->interfaces;
 
-   none
+      # $interfaces is a hash ref containg all pairs of interfaces/ip addresses
+      # Sys::HostIP could find on your machine.
 
-COPYRIGHT AND LICENCE
+      Sys::HostIP->ifconfig("/somewhere/that/ifconfig/lives");
+      # you can set the location of ifconfig with this class method if the code
+      # doesn't seem to know where your ifconfig lives
 
-  This is free software; You can redistribute it or modify it under the same
- terms as Perl itself.
+DESCRIPTION
+    Sys::HostIP does what it can to determine the ip address of your
+    machine. All 3 methods work fine on every system that I've been able to
+    test on. (Irix, OpenBSD, FreeBSD, NetBSD, Solaris, Linux, OSX, Win32,
+    Cygwin). It does this by parsing ifconfig(8) (ipconfig on Win32/Cygwin)
+    output.
+
+  EXPORT
+    Nothing by default!
+
+    But, if you ask for it nicely, you'll get:
+
+    ip(), ips(), interfaces(), and ifconfig().
+
+    To export something explicitly, use the syntax:
+
+        use HostIP qw/ip ips interfaces/;
+        # that will get you those three subroutines, for example
+
+HISTORY
+    Originally written by Jonathan Schatz <bluelines@divisionbyzero.com>.
+
+    Currently maintained by Sawyer X <xsawyerx@cpan.org>.
+
+TODO
+    I haven't tested the win32 code with dialup or wireless connections.
+
+SEE ALSO
+    *   ifconfig(8)
+
+    *   ipconfig
+
+AUTHORS
+      Sawyer X <xsawyerx@cpan.org>
+      Jonathan Schatz <jon@divisionbyzero.com>
+
+COPYRIGHT AND LICENSE
+    This software is copyright (c) 2010 by Sawyer X.
+
+    This is free software; you can redistribute it and/or modify it under
+    the same terms as the Perl 5 programming language system itself.
+

@@ -1,17 +1,59 @@
-use ExtUtils::MakeMaker;
-# See lib/ExtUtils/MakeMaker.pm for details of how to influence
-# the contents of the Makefile that is written.
-WriteMakefile(
-    'NAME'		=> 'Sys::HostIP',
-    'VERSION_FROM'	=> 'HostIP.pm', # finds $VERSION
-    'PREREQ_PM'		=> { }, # e.g., Module::Name => 1.1
-    ($] >= 5.005 ?    ## Add these new keywords supported since 5.005
-      (ABSTRACT_FROM => 'HostIP.pm', # retrieve abstract from module
-       AUTHOR     => 'Jonathan Schatz <bluelines@divisionbyzero.com>') : ()),
-    'LIBS'		=> [''], # e.g., '-lm'
-    'DEFINE'		=> '', # e.g., '-DHAVE_SOMETHING'
-	# Insert -I. if you add *.h files later:
-    'INC'		=> '', # e.g., '-I/usr/include/other'
-	# Un-comment this if you add C files to link with later:
-    # 'OBJECT'		=> '$(O_FILES)', # link all the C files too
+
+use strict;
+use warnings;
+
+
+
+use ExtUtils::MakeMaker 6.31;
+
+
+
+my %WriteMakefileArgs = (
+  'ABSTRACT' => 'Try extra hard to get ip address related info',
+  'AUTHOR' => 'Sawyer X <xsawyerx@cpan.org>, Jonathan Schatz <jon@divisionbyzero.com>',
+  'BUILD_REQUIRES' => {
+    'File::Find' => '0',
+    'File::Temp' => '0',
+    'Module::Build' => '0.3601',
+    'Test::More' => '0'
+  },
+  'CONFIGURE_REQUIRES' => {
+    'ExtUtils::MakeMaker' => '6.31',
+    'Module::Build' => '0.3601'
+  },
+  'DISTNAME' => 'Sys-HostIP',
+  'EXE_FILES' => [],
+  'LICENSE' => 'perl',
+  'NAME' => 'Sys::HostIP',
+  'PREREQ_PM' => {
+    'Carp' => '0',
+    'Exporter' => '0',
+    'vars' => '0'
+  },
+  'VERSION' => '1.4',
+  'test' => {
+    'TESTS' => 't/*.t'
+  }
 );
+
+
+unless ( eval { ExtUtils::MakeMaker->VERSION(6.56) } ) {
+  my $br = delete $WriteMakefileArgs{BUILD_REQUIRES};
+  my $pp = $WriteMakefileArgs{PREREQ_PM};
+  for my $mod ( keys %$br ) {
+    if ( exists $pp->{$mod} ) {
+      $pp->{$mod} = $br->{$mod} if $br->{$mod} > $pp->{$mod};
+    }
+    else {
+      $pp->{$mod} = $br->{$mod};
+    }
+  }
+}
+
+delete $WriteMakefileArgs{CONFIGURE_REQUIRES}
+  unless eval { ExtUtils::MakeMaker->VERSION(6.52) };
+
+WriteMakefile(%WriteMakefileArgs);
+
+
+

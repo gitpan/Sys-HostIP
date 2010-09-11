@@ -1,12 +1,15 @@
-package Sys::HostIP;
 use strict;
 use warnings;
+package Sys::HostIP;
+# ABSTRACT: Try extra hard to get ip address related info
+
 use Carp;
 use Exporter;
-use vars qw($VERSION @ISA @EXPORT);
-$VERSION = '1.3.1';
-@ISA = qw(Exporter);
-@EXPORT = qw(ip ips interfaces ifconfig);
+use vars qw($VERSION @ISA @EXPORT_OK);
+
+$VERSION   = '1.4';
+@ISA       = qw(Exporter);
+@EXPORT_OK = qw( ip ips interfaces ifconfig );
 
 {
   #cache value, except when a new value is specified
@@ -65,17 +68,17 @@ sub _get_interface_info {
   } elsif ( $params{mode} eq 'ip') {
     if ($^O =~/(MSWin32|cygwin)/) {
       foreach my $key (sort keys %$if_info) {
-	#should this be the default?
-	if ($key=~/Local Area Connection/) {
-	  return ($if_info->{$key});
-	} 
+    #should this be the default?
+    if ($key=~/Local Area Connection/) {
+      return ($if_info->{$key});
+    }
       }
     } else {
       foreach my $key (sort keys %$if_info) {
-	#we don't want the loopback
-	next if ($if_info->{$key} eq '127.0.0.1');
-	#now we return the first one that comes up
-	return ($if_info->{$key});
+    #we don't want the loopback
+    next if ($if_info->{$key} eq '127.0.0.1');
+    #now we return the first one that comes up
+    return ($if_info->{$key});
       }
       #we get here if loopback is the only active device
       return "127.0.0.1";
@@ -140,7 +143,8 @@ sub _get_unix_interface_info {
     if ( ($line =~/^\s+/) && ($interface) ) {
       $if_info{$interface} .= $line;
     }
-    elsif (($interface) = ($line =~/(^\w+(?:\d)?(?:\:\d)?)/)) {
+    # FIXME: refactor this regex
+    elsif (($interface) = ($line =~/(^\w+(?:\d)?(?:\.\d+)?(?:\:\d+)?)/)) {
       $line =~s/\w+\d(\:)?\s+//;
       $if_info{$interface} = $line;
     }
@@ -150,14 +154,14 @@ sub _get_unix_interface_info {
       #output. we just want the ip address. perhaps a future version can
       #return even more useful results (netmask, etc).....
       if (my ($ip) = ($if_info{$key} =~/inet (?:addr\:)?(\d+(?:\.\d+){3})/)) {
-	$if_info{$key} = $ip;
+    $if_info{$key} = $ip;
       }
       else {
-	#ok, no ip address here, which means this interface isn't
-	#active. some os's (openbsd for instance) spit out ifconfig info for
-	#inactive devices. this is pretty much worthless for us, so we
-	#delete it from the hash
-	delete $if_info{$key};
+    #ok, no ip address here, which means this interface isn't
+    #active. some os's (openbsd for instance) spit out ifconfig info for
+    #inactive devices. this is pretty much worthless for us, so we
+    #delete it from the hash
+    delete $if_info{$key};
       }
     }
   #now we do some cleanup by deleting keys that have no associated info
@@ -180,7 +184,7 @@ sub _get_win32_interface_info {
     } elsif ($line =~/^\s$/) {
       next;
     } elsif ( 
-	     ($line =~/\s+IP Address.*:\s+(\d+(?:\.\d+){3})/) and $interface) {
+         ($line =~/\s+IP Address.*:\s+(\d+(?:\.\d+){3})/) and $interface) {
       $if_info{$interface} = $1;
       $interface = undef;
     } elsif ($line =~/^Ethernet adapter\s+(.*):/) {
@@ -192,12 +196,18 @@ sub _get_win32_interface_info {
 }
 
 1;
-__END__
-# Below is stub documentation for your module. You better edit it!
+
+
+
+=pod
 
 =head1 NAME
 
 Sys::HostIP - Try extra hard to get ip address related info
+
+=head1 VERSION
+
+version 1.4
 
 =head1 SYNOPSIS
 
@@ -234,11 +244,22 @@ does this by parsing ifconfig(8) (ipconfig on Win32/Cygwin) output.
 
 =head2 EXPORT
 
+Nothing by default!
+
+But, if you ask for it nicely, you'll get:
+
 ip(), ips(), interfaces(), and ifconfig(). 
 
-=head1 AUTHOR
+To export something explicitly, use the syntax:
 
-Jonathan Schatz <bluelines@divisionbyzero.com>
+    use HostIP qw/ip ips interfaces/;
+    # that will get you those three subroutines, for example
+
+=head1 HISTORY
+
+Originally written by Jonathan Schatz <bluelines@divisionbyzero.com>.
+
+Currently maintained by Sawyer X <xsawyerx@cpan.org>.
 
 =head1 TODO
 
@@ -246,9 +267,28 @@ I haven't tested the win32 code with dialup or wireless connections.
 
 =head1 SEE ALSO
 
-ifconfig(8)
-ipconfig 
+=over 4
 
-L<perl>.
+=item * ifconfig(8)
+
+=item * ipconfig
+
+=back
+
+=head1 AUTHORS
+
+  Sawyer X <xsawyerx@cpan.org>
+  Jonathan Schatz <jon@divisionbyzero.com>
+
+=head1 COPYRIGHT AND LICENSE
+
+This software is copyright (c) 2010 by Sawyer X.
+
+This is free software; you can redistribute it and/or modify it under
+the same terms as the Perl 5 programming language system itself.
 
 =cut
+
+
+__END__
+
