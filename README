@@ -2,7 +2,7 @@ NAME
     Sys::HostIP - Try extra hard to get ip address related info
 
 VERSION
-    version 1.6
+    version 1.7
 
 SYNOPSIS
         # functional interface
@@ -36,6 +36,18 @@ ATTRIBUTES
 
     You can set the location of ifconfig with this attributes if the code
     doesn't know where your ifconfig lives.
+
+  if_info
+    The interface information. This is either created on new, or you can
+    create it yourself at initialize.
+
+        # get the cached if_info
+        my $if_info = $hostip->if_info;
+
+        # create custom one at initialize
+        my $hostip = Sys::HostIP->new( if_info => {...} );
+
+    If you use the object oriented interface, this value is cached.
 
 METHODS
   ip
