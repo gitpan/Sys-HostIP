@@ -13,9 +13,12 @@ my %WriteMakefileArgs = (
   'AUTHOR' => 'Sawyer X <xsawyerx@cpan.org>, Jonathan Schatz <jon@divisionbyzero.com>',
   'BUILD_REQUIRES' => {
     'File::Find' => '0',
+    'File::Spec' => '0',
     'File::Temp' => '0',
     'Module::Build' => '0.3601',
-    'Test::More' => '0'
+    'Test::Exception' => '0',
+    'Test::More' => '0',
+    'Test::TinyMocker' => '0'
   },
   'CONFIGURE_REQUIRES' => {
     'ExtUtils::MakeMaker' => '6.31',
@@ -30,7 +33,7 @@ my %WriteMakefileArgs = (
     'Exporter' => '0',
     'vars' => '0'
   },
-  'VERSION' => '1.7',
+  'VERSION' => '1.8',
   'test' => {
     'TESTS' => 't/*.t'
   }

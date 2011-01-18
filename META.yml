@@ -5,14 +5,17 @@ author:
   - 'Jonathan Schatz <jon@divisionbyzero.com>'
 build_requires:
   File::Find: 0
+  File::Spec: 0
   File::Temp: 0
   Module::Build: 0.3601
+  Test::Exception: 0
   Test::More: 0
+  Test::TinyMocker: 0
 configure_requires:
   ExtUtils::MakeMaker: 6.31
   Module::Build: 0.3601
 dynamic_config: 0
-generated_by: 'Dist::Zilla version 4.102340, CPAN::Meta::Converter version 2.101591'
+generated_by: 'Dist::Zilla version 4.200000, CPAN::Meta::Converter version 2.101591'
 license: perl
 meta-spec:
   url: http://module-build.sourceforge.net/META-spec-v1.4.html
@@ -22,4 +25,4 @@ requires:
   Carp: 0
   Exporter: 0
   vars: 0
-version: 1.7
+version: 1.8
