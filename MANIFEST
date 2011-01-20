@@ -10,7 +10,8 @@ lib/Sys/HostIP.pm
 t/00-compile.t
 t/base.t
 t/data/ipconfig-2k.txt
+t/data/ipconfig-win7.txt
 t/data/ipconfig-xp.txt
 t/ifconfig.t
-t/ifconfig_win.t
+t/ipconfig.t
 t/release-pod-syntax.t

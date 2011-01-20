@@ -25,4 +25,4 @@ requires:
   Carp: 0
   Exporter: 0
   vars: 0
-version: 1.8
+version: 1.81

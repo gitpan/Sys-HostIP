@@ -25,7 +25,7 @@ my %module_build_args = (
     'Jonathan Schatz <jon@divisionbyzero.com>'
   ],
   'dist_name' => 'Sys-HostIP',
-  'dist_version' => '1.8',
+  'dist_version' => '1.81',
   'license' => 'perl',
   'module_name' => 'Sys::HostIP',
   'recommends' => {},
