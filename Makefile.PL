@@ -4,38 +4,39 @@ use warnings;
 
 
 
-use ExtUtils::MakeMaker 6.31;
+use ExtUtils::MakeMaker 6.30;
 
 
 
 my %WriteMakefileArgs = (
-  'ABSTRACT' => 'Try extra hard to get ip address related info',
-  'AUTHOR' => 'Sawyer X <xsawyerx@cpan.org>, Jonathan Schatz <jon@divisionbyzero.com>',
-  'BUILD_REQUIRES' => {
-    'File::Find' => '0',
-    'File::Spec' => '0',
-    'File::Temp' => '0',
-    'Module::Build' => '0.3601',
-    'Test::Exception' => '0',
-    'Test::More' => '0',
-    'Test::TinyMocker' => '0'
+  "ABSTRACT" => "Try extra hard to get IP address related info",
+  "AUTHOR" => "Sawyer X <xsawyerx\@cpan.org>, Jonathan Schatz <jon\@divisionbyzero.com>",
+  "BUILD_REQUIRES" => {
+    "File::Find" => 0,
+    "File::Spec" => 0,
+    "File::Temp" => 0,
+    "Module::Build" => "0.3601",
+    "Test::More" => 0
   },
-  'CONFIGURE_REQUIRES' => {
-    'ExtUtils::MakeMaker' => '6.31',
-    'Module::Build' => '0.3601'
+  "CONFIGURE_REQUIRES" => {
+    "ExtUtils::MakeMaker" => "6.30",
+    "Module::Build" => "0.3601"
   },
-  'DISTNAME' => 'Sys-HostIP',
-  'EXE_FILES' => [],
-  'LICENSE' => 'perl',
-  'NAME' => 'Sys::HostIP',
-  'PREREQ_PM' => {
-    'Carp' => '0',
-    'Exporter' => '0',
-    'vars' => '0'
+  "DISTNAME" => "Sys-HostIP",
+  "EXE_FILES" => [],
+  "LICENSE" => "perl",
+  "NAME" => "Sys::HostIP",
+  "PREREQ_PM" => {
+    "Carp" => 0,
+    "Exporter" => 0,
+    "File::Basename" => 0,
+    "strict" => 0,
+    "vars" => 0,
+    "warnings" => 0
   },
-  'VERSION' => '1.81',
-  'test' => {
-    'TESTS' => 't/*.t'
+  "VERSION" => "1.90",
+  "test" => {
+    "TESTS" => "t/*.t"
   }
 );
 

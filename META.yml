@@ -1,5 +1,5 @@
 ---
-abstract: 'Try extra hard to get ip address related info'
+abstract: 'Try extra hard to get IP address related info'
 author:
   - 'Sawyer X <xsawyerx@cpan.org>'
   - 'Jonathan Schatz <jon@divisionbyzero.com>'
@@ -8,14 +8,12 @@ build_requires:
   File::Spec: 0
   File::Temp: 0
   Module::Build: 0.3601
-  Test::Exception: 0
   Test::More: 0
-  Test::TinyMocker: 0
 configure_requires:
-  ExtUtils::MakeMaker: 6.31
+  ExtUtils::MakeMaker: 6.30
   Module::Build: 0.3601
 dynamic_config: 0
-generated_by: 'Dist::Zilla version 4.200000, CPAN::Meta::Converter version 2.101591'
+generated_by: 'Dist::Zilla version 4.300003, CPAN::Meta::Converter version 2.112150'
 license: perl
 meta-spec:
   url: http://module-build.sourceforge.net/META-spec-v1.4.html
@@ -24,5 +22,8 @@ name: Sys-HostIP
 requires:
   Carp: 0
   Exporter: 0
+  File::Basename: 0
+  strict: 0
   vars: 0
-version: 1.81
+  warnings: 0
+version: 1.90

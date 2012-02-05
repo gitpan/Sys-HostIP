@@ -1,13 +1,12 @@
 use strict;
 use warnings;
 use Test::More tests => 7;
-use Test::Exception;
 use Sys::HostIP;
 
 {
     no warnings 'redefine';
 
-    *Sys::HostIP::_get_ifconfig = sub {
+    *Sys::HostIP::_get_ifconfig_binary = sub {
         my $object = shift;
         isa_ok( $object, 'Sys::HostIP' );
         cmp_ok( @_, '==', 0, 'Got no parameters' );

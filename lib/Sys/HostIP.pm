@@ -1,13 +1,14 @@
 use strict;
 use warnings;
 package Sys::HostIP;
-BEGIN {
-  $Sys::HostIP::VERSION = '1.81';
+{
+  $Sys::HostIP::VERSION = '1.90';
 }
-# ABSTRACT: Try extra hard to get ip address related info
+# ABSTRACT: Try extra hard to get IP address related info
 
 use Carp;
 use Exporter;
+use File::Basename 'dirname';
 use vars qw( @ISA @EXPORT_OK );
 
 @ISA       = qw(Exporter);
@@ -18,7 +19,7 @@ sub new {
     my %opts  = @_;
     my $self  = bless {%opts}, $class;
 
-    $self->{'ifconfig'} ||= $self->_get_ifconfig;
+    $self->{'ifconfig'} ||= $self->_get_ifconfig_binary;
     $self->{'if_info'}  ||= $self->_get_interface_info;
 
     return $self;
@@ -28,17 +29,28 @@ sub ifconfig {
     my $self = shift;
     my $path = shift;
 
-    ref $self or return $self->_get_ifconfig;
+    if ( ! ref $self ) {
+        carp 'Functional interface is deprecated';
+        return $self->_get_ifconfig_binary;
+    }
 
+    # set path
     $path and $self->{'ifconfig'} = $path;
+
     return $self->{'ifconfig'};
 }
 
 sub ip {
-    my $self    = shift || 'Sys::HostIP';
-    my $if_info = ref $self      ?
-                  $self->if_info :
-                  $self->_get_interface_info;
+    my $self = shift || 'Sys::HostIP';
+    my $if_info;
+
+    # TODO: this to be removed in future versions
+    if ( ! ref $self ) {
+        carp 'Functional interface is deprecated';
+        $if_info = $self->_get_interface_info;
+    } else {
+        $if_info = $self->if_info;
+    }
 
     if ( $^O =~/(MSWin32|cygwin)/ ) {
         foreach my $key ( sort keys %{$if_info} ) {
@@ -63,28 +75,39 @@ sub ip {
 sub ips {
     my $self = shift || 'Sys::HostIP';
 
-    return ref $self                               ?
-        [ values %{ $self->if_info             } ] :
-        [ values %{ $self->_get_interface_info } ];
+    # TODO: this to be removed in future versions
+    if ( ! ref $self ) {
+        carp 'Functional interface is deprecated';
+        return [ values %{ $self->_get_interface_info } ];
+    }
+
+    return [ values %{ $self->if_info } ];
 }
 
 sub interfaces {
     my $self = shift || 'Sys::HostIP';
 
-    return ref $self      ?
-           $self->if_info :
-           $self->_get_interface_info;
+    # TODO: this to be removed in future versions
+    if ( ! ref $self ) {
+        carp 'Functional interface is deprecated';
+        return $self->_get_interface_info;
+    }
+
+   return $self->if_info;
 }
 
 sub if_info {
     my $self = shift;
 
-    ref $self or return $self->_get_ifconfig;
+    if ( ! ref $self ) {
+        carp 'Functional interface is deprecated';
+        return $self->_get_ifconfig_binary;
+    }
 
     return $self->{'if_info'};
 }
 
-sub _get_ifconfig {
+sub _get_ifconfig_binary {
     my $self     = shift;
     my $ifconfig = '/sbin/ifconfig -a';
 
@@ -102,10 +125,6 @@ sub _get_ifconfig {
     return $ifconfig;
 }
 
-sub _run_ipconfig {
-    return `ipconfig`;
-}
-
 sub _get_interface_info {
     my $self    = shift;
     my %params  = @_;
@@ -118,49 +137,61 @@ sub _get_interface_info {
     }
 }
 
-sub _get_unix_interface_info {
-    my ($self) = @_;
-    my %if_info;
-    my ($ip, $interface) = undef;
-    #this is an attempt to fix tainting problems
-    local %ENV;
-    # $BASH_ENV must be unset to pass tainting problems if your system uses
-    # bash as /bin/sh
-    if (exists $ENV{'BASH_ENV'} and defined $ENV{'BASH_ENV'}) {
-        $ENV{'BASH_ENV'} = undef;
-    }
-    #now we set the local $ENV{'PATH'} to be only the path to ifconfig
-    my ($newpath)  = ( $self->ifconfig =~/(\/\w+)(?:\s\S+)$/) ;
-    $ENV{'PATH'} = $newpath;
+sub _clean_ifconfig_env {
+    my $self = shift;
+    # this is an attempt to fix tainting problems
+
+    # removing $BASH_ENV, which exists if /bin/sh is your bash
+    delete $ENV{'BASH_ENV'};
+
+    # now we set the local $ENV{'PATH'} to be only the path to ifconfig
     my $ifconfig = $self->ifconfig;
+    $ENV{'PATH'} = dirname $ifconfig;
+
+    return $ifconfig;
+}
+
+sub _get_unix_interface_info {
+    my $self = shift;
+
+    # localize the environment
+    local %ENV;
+
     # make sure nothing else has touched $/
     local $/ = "\n";
-    my @ifconfig = `$ifconfig`;
+
+    my ( $ip, $interface, %if_info );
+
+    # clean environment for taint mode
+    my $ifconfig_bin = $self->_clean_ifconfig_env();
+    my @ifconfig     = `$ifconfig_bin`;
+
     foreach my $line (@ifconfig) {
-        #output from 'ifconfig -a' looks something like this on every *nix i
-        #could get my hand on except linux (this one's actually from OpenBSD):
+        # TODO: refactor this into tests
+        # output from 'ifconfig -a' looks something like this on every *nix i
+        # could get my hand on except linux (this one's actually from OpenBSD):
         #
-        #gershiwin:~# /sbin/ifconfig -a
-        #lo0: flags=8009<UP,LOOPBACK,MULTICAST>
-        #        inet 127.0.0.1 netmask 0xff000000 
-        #lo1: flags=8008<LOOPBACK,MULTICAST>
-        #xl0: flags=8843<UP,BROADCAST,RUNNING,SIMPLEX,MULTICAST>
-        #        media: Ethernet autoselect (100baseTX full-duplex)
-        #        status: active
-        #        inet 10.0.0.2 netmask 0xfffffff0 broadcast 10.0.0.255
-        #sl0: flags=c010<POINTOPOINT,LINK2,MULTICAST>
-        #sl1: flags=c010<POINTOPOINT,LINK2,MULTICAST>
-        #
-        #in linux it's a little bit different:
-        #
-        #[jschatz@nooky Sys-IP]$ /sbin/ifconfig 
-        # eth0      Link encap:Ethernet  HWaddr 00:C0:4F:60:6F:C2  
-        #          inet addr:10.0.3.82  Bcast:10.0.255.255  Mask:255.255.0.0
-        #          UP BROADCAST RUNNING MULTICAST  MTU:1500  Metric:1
-        #          Interrupt:19 Base address:0xec00 
-        # lo        Link encap:Local Loopback  
-        #          inet addr:127.0.0.1  Mask:255.0.0.0
-        #          UP LOOPBACK RUNNING  MTU:3924  Metric:1
+        # gershiwin:~# /sbin/ifconfig -a
+        # lo0: flags=8009<UP,LOOPBACK,MULTICAST>
+        #         inet 127.0.0.1 netmask 0xff000000 
+        # lo1: flags=8008<LOOPBACK,MULTICAST>
+        # xl0: flags=8843<UP,BROADCAST,RUNNING,SIMPLEX,MULTICAST>
+        #         media: Ethernet autoselect (100baseTX full-duplex)
+        #         status: active
+        #         inet 10.0.0.2 netmask 0xfffffff0 broadcast 10.0.0.255
+        # sl0: flags=c010<POINTOPOINT,LINK2,MULTICAST>
+        # sl1: flags=c010<POINTOPOINT,LINK2,MULTICAST>
+        # 
+        # in linux it's a little bit different:
+        # 
+        # [jschatz@nooky Sys-IP]$ /sbin/ifconfig 
+        #  eth0      Link encap:Ethernet  HWaddr 00:C0:4F:60:6F:C2  
+        #           inet addr:10.0.3.82  Bcast:10.0.255.255  Mask:255.255.0.0
+        #           UP BROADCAST RUNNING MULTICAST  MTU:1500  Metric:1
+        #           Interrupt:19 Base address:0xec00 
+        #  lo        Link encap:Local Loopback  
+        #           inet addr:127.0.0.1  Mask:255.0.0.0
+        #           UP LOOPBACK RUNNING  MTU:3924  Metric:1
         #
         # so the regexen involved here have to deal with the following: 1)
         # there's no ':' after an interface's name in linux 2) in linux, it's
@@ -168,10 +199,10 @@ sub _get_unix_interface_info {
         # hairy regexen /(^\w+(?:\d)?(?:\:\d)?)/ (which also handles aliased ip
         # addresses , ie eth0:1) and /inet(?:addr\:)?(\d+\.\d+\.\d+\.\d+)/
         #
-        #so we parse through the list returned. if the line starts with some
-        #letters followed (possibly) by an number and a colon, then we've got an
-        #interface. if the line starts with a space, then it's the info from the
-        #interface that we just found, and we stick the contents into %if_info
+        # so we parse through the list returned. if the line starts with some
+        # letters followed (possibly) by an number and a colon, then we've got an
+        # interface. if the line starts with a space, then it's the info from the
+        # interface that we just found, and we stick the contents into %if_info
         if ( ($line =~/^\s+/) && ($interface) ) {
             $if_info{$interface} .= $line;
         }
@@ -181,26 +212,32 @@ sub _get_unix_interface_info {
             $if_info{$interface} = $line;
         }
     }
-      foreach my $key (keys %if_info) {
-          #now we want to get rid of all the other crap in the ifconfig
-          #output. we just want the ip address. perhaps a future version can
-          #return even more useful results (netmask, etc).....
-          if (my ($ip) = ($if_info{$key} =~/inet (?:addr\:)?(\d+(?:\.\d+){3})/)) {
-              $if_info{$key} = $ip;
-          }
-          else {
-            #ok, no ip address here, which means this interface isn't
-            #active. some os's (openbsd for instance) spit out ifconfig info for
-            #inactive devices. this is pretty much worthless for us, so we
-            #delete it from the hash
-           delete $if_info{$key};
-          }
-      }
-      #now we do some cleanup by deleting keys that have no associated info
-      #(some os's like openbsd list inactive interfaces when 'ifconfig -a' is
-      #used, and we don't care about those
-      return \%if_info;
+
+    foreach my $key (keys %if_info) {
+        # now we want to get rid of all the other crap in the ifconfig
+        # output. we just want the ip address. perhaps a future version can
+        # return even more useful results (netmask, etc).....
+        if (my ($ip) = ($if_info{$key} =~/inet (?:addr\:)?(\d+(?:\.\d+){3})/)) {
+            $if_info{$key} = $ip;
+        }
+        else {
+          # ok, no ip address here, which means this interface isn't
+          # active. some os's (openbsd for instance) spit out ifconfig info for
+          # inactive devices. this is pretty much worthless for us, so we
+          # delete it from the hash
+         delete $if_info{$key};
+        }
+    }
+
+    # now we do some cleanup by deleting keys that have no associated info
+    # (some os's like openbsd list inactive interfaces when 'ifconfig -a' is
+    # used, and we don't care about those
+    return \%if_info;
 } 
+
+sub _run_ipconfig {
+    return `ipconfig`;
+}
 
 sub _get_win32_interface_info {
     my $self    = shift;
@@ -220,9 +257,8 @@ sub _get_win32_interface_info {
         /x,
     );
 
+    my @ipconfig = $self->_run_ipconfig();
     my ( $interface, %if_info );
-
-    my @ipconfig = $self->_run_ipconfig;
 
     foreach my $line (@ipconfig) {
         chomp($line);
@@ -252,28 +288,19 @@ sub _get_win32_interface_info {
 
 =head1 NAME
 
-Sys::HostIP - Try extra hard to get ip address related info
+Sys::HostIP - Try extra hard to get IP address related info
 
 =head1 VERSION
 
-version 1.81
+version 1.90
 
 =head1 SYNOPSIS
 
-    # functional interface
-    use Sys::HostIP qw/ ips interfaces /;
-
-    my $ip_addresses = ips();
-    my $interfaces   = interfaces();
-
-    # object oriented interface
     use Sys::HostIP;
 
     my $hostip     = Sys::HostIP->new;
     my $ips        = $hostip->ips;
     my $interfaces = $hostip->interfaces;
-
-    $hostip->ifconfig("/sr/local/sbin/ifconfig"); # new location
 
 =head1 DESCRIPTION
 
@@ -282,16 +309,13 @@ machine. All 3 methods work fine on every system that I've been able to test
 on. (Irix, OpenBSD, FreeBSD, NetBSD, Solaris, Linux, OSX, Win32, Cygwin). It 
 does this by parsing ifconfig(8) (ipconfig on Win32/Cygwin) output. 
 
-It has an object oriented interface and a functional one for compatibility
-with older versions.
-
 =head1 ATTRIBUTES
 
 =head2 ifconfig
 
     my $hostip = Sys::HostIP->new( ifconfig => '/path/to/your/ifconfig' );
 
-You can set the location of ifconfig with this attributes if the code doesn't
+You can set the location of ifconfig with this attribute if the code doesn't
 know where your ifconfig lives.
 
 =head2 if_info
@@ -305,8 +329,6 @@ it yourself at initialize.
     # create custom one at initialize
     my $hostip = Sys::HostIP->new( if_info => {...} );
 
-If you use the object oriented interface, this value is cached.
-
 =head1 METHODS
 
 =head2 ip
@@ -314,8 +336,8 @@ If you use the object oriented interface, this value is cached.
     my $ip = $hostip->ip;
 
 Returns a scalar containing a best guess of your host machine's IP address. On
-unix systems, it will return loopback (127.0.0.1) if it can't find anything
-else.
+*nix (Unix, BSD, GNU/Linux, OSX, etc.) systems, it will return the loopback
+interface (127.0.0.1) if it can't find anything else.
 
 =head2 ips
 
@@ -340,30 +362,9 @@ IP addresses Sys::HostIP could find on your machine.
 
 =head2 EXPORT
 
-Nothing by default!
+Nothing.
 
-To export something explicitly, use the syntax:
-
-    use HostIP qw/ip ips interfaces/;
-    # that will get you those three subroutines, for example
-
-All of these subroutines will match the object oriented interface methods.
-
-=over 4
-
-=item * ip
-
-    my $ip = ip();
-
-=item * ips
-
-    my $ips = ips();
-
-=item * interfaces
-
-    my $interfaces = interfaces();
-
-=back
+This module is completely Object Oriented.
 
 =head1 HISTORY
 
@@ -374,6 +375,8 @@ Currently maintained by Sawyer X <xsawyerx@cpan.org>.
 =head1 TODO
 
 I haven't tested the win32 code with dialup or wireless connections.
+
+Machines with output in different languages (German, for example) fail.
 
 =head1 SEE ALSO
 
@@ -387,8 +390,17 @@ I haven't tested the win32 code with dialup or wireless connections.
 
 =head1 AUTHORS
 
-  Sawyer X <xsawyerx@cpan.org>
-  Jonathan Schatz <jon@divisionbyzero.com>
+=over 4
+
+=item *
+
+Sawyer X <xsawyerx@cpan.org>
+
+=item *
+
+Jonathan Schatz <jon@divisionbyzero.com>
+
+=back
 
 =head1 COPYRIGHT AND LICENSE
 

@@ -1,24 +1,15 @@
 NAME
-    Sys::HostIP - Try extra hard to get ip address related info
+    Sys::HostIP - Try extra hard to get IP address related info
 
 VERSION
-    version 1.81
+    version 1.90
 
 SYNOPSIS
-        # functional interface
-        use Sys::HostIP qw/ ips interfaces /;
-
-        my $ip_addresses = ips();
-        my $interfaces   = interfaces();
-
-        # object oriented interface
         use Sys::HostIP;
 
         my $hostip     = Sys::HostIP->new;
         my $ips        = $hostip->ips;
         my $interfaces = $hostip->interfaces;
-
-        $hostip->ifconfig("/sr/local/sbin/ifconfig"); # new location
 
 DESCRIPTION
     Sys::HostIP does what it can to determine the ip address of your
@@ -27,14 +18,11 @@ DESCRIPTION
     Cygwin). It does this by parsing ifconfig(8) (ipconfig on Win32/Cygwin)
     output.
 
-    It has an object oriented interface and a functional one for
-    compatibility with older versions.
-
 ATTRIBUTES
   ifconfig
         my $hostip = Sys::HostIP->new( ifconfig => '/path/to/your/ifconfig' );
 
-    You can set the location of ifconfig with this attributes if the code
+    You can set the location of ifconfig with this attribute if the code
     doesn't know where your ifconfig lives.
 
   if_info
@@ -47,15 +35,14 @@ ATTRIBUTES
         # create custom one at initialize
         my $hostip = Sys::HostIP->new( if_info => {...} );
 
-    If you use the object oriented interface, this value is cached.
-
 METHODS
   ip
         my $ip = $hostip->ip;
 
     Returns a scalar containing a best guess of your host machine's IP
-    address. On unix systems, it will return loopback (127.0.0.1) if it
-    can't find anything else.
+    address. On *nix (Unix, BSD, GNU/Linux, OSX, etc.) systems, it will
+    return the loopback interface (127.0.0.1) if it can't find anything
+    else.
 
   ips
         my $all_ips = $hostip->ips;
@@ -77,27 +64,9 @@ METHODS
     corresponding IP addresses Sys::HostIP could find on your machine.
 
   EXPORT
-    Nothing by default!
+    Nothing.
 
-    To export something explicitly, use the syntax:
-
-        use HostIP qw/ip ips interfaces/;
-        # that will get you those three subroutines, for example
-
-    All of these subroutines will match the object oriented interface
-    methods.
-
-    *   ip
-
-            my $ip = ip();
-
-    *   ips
-
-            my $ips = ips();
-
-    *   interfaces
-
-            my $interfaces = interfaces();
+    This module is completely Object Oriented.
 
 HISTORY
     Originally written by Jonathan Schatz <bluelines@divisionbyzero.com>.
@@ -107,14 +76,17 @@ HISTORY
 TODO
     I haven't tested the win32 code with dialup or wireless connections.
 
+    Machines with output in different languages (German, for example) fail.
+
 SEE ALSO
     *   ifconfig(8)
 
     *   ipconfig
 
 AUTHORS
-      Sawyer X <xsawyerx@cpan.org>
-      Jonathan Schatz <jon@divisionbyzero.com>
+    *   Sawyer X <xsawyerx@cpan.org>
+
+    *   Jonathan Schatz <jon@divisionbyzero.com>
 
 COPYRIGHT AND LICENSE
     This software is copyright (c) 2010 by Sawyer X.
