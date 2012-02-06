@@ -2,7 +2,7 @@ NAME
     Sys::HostIP - Try extra hard to get IP address related info
 
 VERSION
-    version 1.90
+    version 1.91
 
 SYNOPSIS
         use Sys::HostIP;
@@ -18,12 +18,17 @@ DESCRIPTION
     Cygwin). It does this by parsing ifconfig(8) (ipconfig on Win32/Cygwin)
     output.
 
+    It has an object oriented interface and a functional one for
+    compatibility with older versions.
+
 ATTRIBUTES
   ifconfig
         my $hostip = Sys::HostIP->new( ifconfig => '/path/to/your/ifconfig' );
 
     You can set the location of ifconfig with this attribute if the code
     doesn't know where your ifconfig lives.
+
+    If you use the object oriented interface, this value is cached.
 
   if_info
     The interface information. This is either created on new, or you can
@@ -64,9 +69,27 @@ METHODS
     corresponding IP addresses Sys::HostIP could find on your machine.
 
   EXPORT
-    Nothing.
+    Nothing by default!
 
-    This module is completely Object Oriented.
+    To export something explicitly, use the syntax: Nothing.
+
+        use HostIP qw/ip ips interfaces/;
+        # that will get you those three subroutines, for example
+
+    All of these subroutines will match the object oriented interface
+    methods.
+
+    *   ip
+
+            my $ip = ip();
+
+    *   ips
+
+            my $ips = ips();
+
+    *   interfaces
+
+            my $interfaces = interfaces();
 
 HISTORY
     Originally written by Jonathan Schatz <bluelines@divisionbyzero.com>.

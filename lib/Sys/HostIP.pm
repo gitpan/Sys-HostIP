@@ -2,7 +2,7 @@ use strict;
 use warnings;
 package Sys::HostIP;
 {
-  $Sys::HostIP::VERSION = '1.90';
+  $Sys::HostIP::VERSION = '1.91';
 }
 # ABSTRACT: Try extra hard to get IP address related info
 
@@ -14,12 +14,15 @@ use vars qw( @ISA @EXPORT_OK );
 @ISA       = qw(Exporter);
 @EXPORT_OK = qw( ip ips interfaces ifconfig );
 
+my $is_win = $^O =~ qr/(MSWin32|cygwin)/;
+
 sub new {
     my $class = shift || croak 'Cannot create new method in a functional way';
     my %opts  = @_;
     my $self  = bless {%opts}, $class;
 
-    $self->{'ifconfig'} ||= $self->_get_ifconfig_binary;
+    # only get ifconfig binary if it's not a windows
+    $self->{'ifconfig'} ||= $is_win ? '' : $self->_get_ifconfig_binary;
     $self->{'if_info'}  ||= $self->_get_interface_info;
 
     return $self;
@@ -30,7 +33,6 @@ sub ifconfig {
     my $path = shift;
 
     if ( ! ref $self ) {
-        carp 'Functional interface is deprecated';
         return $self->_get_ifconfig_binary;
     }
 
@@ -44,15 +46,13 @@ sub ip {
     my $self = shift || 'Sys::HostIP';
     my $if_info;
 
-    # TODO: this to be removed in future versions
     if ( ! ref $self ) {
-        carp 'Functional interface is deprecated';
         $if_info = $self->_get_interface_info;
     } else {
         $if_info = $self->if_info;
     }
 
-    if ( $^O =~/(MSWin32|cygwin)/ ) {
+    if ($is_win) {
         foreach my $key ( sort keys %{$if_info} ) {
             # should this be the default?
             if ( $key =~ /Local Area Connection/ ) {
@@ -75,9 +75,7 @@ sub ip {
 sub ips {
     my $self = shift || 'Sys::HostIP';
 
-    # TODO: this to be removed in future versions
     if ( ! ref $self ) {
-        carp 'Functional interface is deprecated';
         return [ values %{ $self->_get_interface_info } ];
     }
 
@@ -87,9 +85,7 @@ sub ips {
 sub interfaces {
     my $self = shift || 'Sys::HostIP';
 
-    # TODO: this to be removed in future versions
     if ( ! ref $self ) {
-        carp 'Functional interface is deprecated';
         return $self->_get_interface_info;
     }
 
@@ -100,7 +96,6 @@ sub if_info {
     my $self = shift;
 
     if ( ! ref $self ) {
-        carp 'Functional interface is deprecated';
         return $self->_get_ifconfig_binary;
     }
 
@@ -127,14 +122,9 @@ sub _get_ifconfig_binary {
 
 sub _get_interface_info {
     my $self    = shift;
-    my %params  = @_;
-    my $if_info = {};
-
-    if ( $^O =~/(?: MSWin32|cygwin )/xi ) {
-        $if_info = $self->_get_win32_interface_info();
-    } else {
-        $if_info = $self->_get_unix_interface_info();
-    }
+    my $if_info = $is_win                            ?
+                  $self->_get_win32_interface_info() :
+                  $self->_get_unix_interface_info();
 }
 
 sub _clean_ifconfig_env {
@@ -292,7 +282,7 @@ Sys::HostIP - Try extra hard to get IP address related info
 
 =head1 VERSION
 
-version 1.90
+version 1.91
 
 =head1 SYNOPSIS
 
@@ -309,6 +299,9 @@ machine. All 3 methods work fine on every system that I've been able to test
 on. (Irix, OpenBSD, FreeBSD, NetBSD, Solaris, Linux, OSX, Win32, Cygwin). It 
 does this by parsing ifconfig(8) (ipconfig on Win32/Cygwin) output. 
 
+It has an object oriented interface and a functional one for compatibility
+with older versions.
+
 =head1 ATTRIBUTES
 
 =head2 ifconfig
@@ -317,6 +310,8 @@ does this by parsing ifconfig(8) (ipconfig on Win32/Cygwin) output.
 
 You can set the location of ifconfig with this attribute if the code doesn't
 know where your ifconfig lives.
+
+If you use the object oriented interface, this value is cached.
 
 =head2 if_info
 
@@ -362,9 +357,31 @@ IP addresses Sys::HostIP could find on your machine.
 
 =head2 EXPORT
 
+Nothing by default!
+
+To export something explicitly, use the syntax:
 Nothing.
 
-This module is completely Object Oriented.
+    use HostIP qw/ip ips interfaces/;
+    # that will get you those three subroutines, for example
+
+All of these subroutines will match the object oriented interface methods.
+
+=over 4
+
+=item * ip
+
+    my $ip = ip();
+
+=item * ips
+
+    my $ips = ips();
+
+=item * interfaces
+
+    my $interfaces = interfaces();
+
+=back
 
 =head1 HISTORY
 
