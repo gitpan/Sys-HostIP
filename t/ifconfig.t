@@ -1,7 +1,9 @@
 use strict;
 use warnings;
-use Test::More tests => 7;
+use Test::More;
 use Sys::HostIP;
+
+plan tests => $^O =~ qr/(MSWin32|cygwin)/ ? 5 : 7;
 
 {
     no warnings 'redefine';

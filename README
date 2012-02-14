@@ -2,7 +2,7 @@ NAME
     Sys::HostIP - Try extra hard to get IP address related info
 
 VERSION
-    version 1.92
+    version 1.93
 
 SYNOPSIS
         use Sys::HostIP;
