@@ -4,6 +4,7 @@ author:
   - 'Sawyer X <xsawyerx@cpan.org>'
   - 'Jonathan Schatz <jon@divisionbyzero.com>'
 build_requires:
+  Data::Dumper: 0
   File::Find: 0
   File::Spec: 0
   File::Temp: 0
@@ -26,4 +27,4 @@ requires:
   strict: 0
   vars: 0
   warnings: 0
-version: 1.91
+version: 1.92

@@ -12,6 +12,7 @@ my %WriteMakefileArgs = (
   "ABSTRACT" => "Try extra hard to get IP address related info",
   "AUTHOR" => "Sawyer X <xsawyerx\@cpan.org>, Jonathan Schatz <jon\@divisionbyzero.com>",
   "BUILD_REQUIRES" => {
+    "Data::Dumper" => 0,
     "File::Find" => 0,
     "File::Spec" => 0,
     "File::Temp" => 0,
@@ -34,7 +35,7 @@ my %WriteMakefileArgs = (
     "vars" => 0,
     "warnings" => 0
   },
-  "VERSION" => "1.91",
+  "VERSION" => "1.92",
   "test" => {
     "TESTS" => "t/*.t"
   }

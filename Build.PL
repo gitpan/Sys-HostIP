@@ -7,6 +7,7 @@ use Module::Build 0.3601;
 
 my %module_build_args = (
   "build_requires" => {
+    "Data::Dumper" => 0,
     "File::Find" => 0,
     "File::Spec" => 0,
     "File::Temp" => 0,
@@ -23,7 +24,7 @@ my %module_build_args = (
     "Jonathan Schatz <jon\@divisionbyzero.com>"
   ],
   "dist_name" => "Sys-HostIP",
-  "dist_version" => "1.91",
+  "dist_version" => "1.92",
   "license" => "perl",
   "module_name" => "Sys::HostIP",
   "recommends" => {},

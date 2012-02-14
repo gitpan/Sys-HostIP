@@ -2,7 +2,7 @@ use strict;
 use warnings;
 package Sys::HostIP;
 {
-  $Sys::HostIP::VERSION = '1.91';
+  $Sys::HostIP::VERSION = '1.92';
 }
 # ABSTRACT: Try extra hard to get IP address related info
 
@@ -282,7 +282,7 @@ Sys::HostIP - Try extra hard to get IP address related info
 
 =head1 VERSION
 
-version 1.91
+version 1.92
 
 =head1 SYNOPSIS
 
@@ -347,7 +347,7 @@ Returns an array ref containing all the IP addresses of your machine.
 
     my $interfaces = $hostip->interfaces;
 
-    foreach my $interface ( @{$interfaces} ) {
+    foreach my $interface ( keys %{$interfaces} ) {
         my $ip = $interfaces->{$interface};
         print "$interface => $ip"\n";
     }
@@ -421,7 +421,7 @@ Jonathan Schatz <jon@divisionbyzero.com>
 
 =head1 COPYRIGHT AND LICENSE
 
-This software is copyright (c) 2010 by Sawyer X.
+This software is copyright (c) 2012 by Sawyer X.
 
 This is free software; you can redistribute it and/or modify it under
 the same terms as the Perl 5 programming language system itself.
