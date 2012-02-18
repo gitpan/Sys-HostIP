@@ -2,7 +2,7 @@ use strict;
 use warnings;
 package Sys::HostIP;
 {
-  $Sys::HostIP::VERSION = '1.93';
+  $Sys::HostIP::VERSION = '1.94';
 }
 # ABSTRACT: Try extra hard to get IP address related info
 
@@ -60,15 +60,23 @@ sub ip {
             }
         }
     } else {
+        my $lo_found;
+
         foreach my $key ( sort keys %{$if_info} ) {
             # we don't want the loopback
-            next if ( $if_info->{$key} eq '127.0.0.1' );
+            if ( $if_info->{$key} eq '127.0.0.1' ) {
+                $lo_found++;
+                next;
+            }
+
             # now we return the first one that comes up
             return ( $if_info->{$key} );
         }
 
         # we get here if loopback is the only active device
-        return '127.0.0.1';
+        $lo_found and return '127.0.0.1';
+
+        return;
     }
 }
 
@@ -282,7 +290,7 @@ Sys::HostIP - Try extra hard to get IP address related info
 
 =head1 VERSION
 
-version 1.93
+version 1.94
 
 =head1 SYNOPSIS
 
