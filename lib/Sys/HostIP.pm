@@ -2,7 +2,7 @@ use strict;
 use warnings;
 package Sys::HostIP;
 {
-  $Sys::HostIP::VERSION = '1.94';
+  $Sys::HostIP::VERSION = '1.95';
 }
 # ABSTRACT: Try extra hard to get IP address related info
 
@@ -290,7 +290,7 @@ Sys::HostIP - Try extra hard to get IP address related info
 
 =head1 VERSION
 
-version 1.94
+version 1.95
 
 =head1 SYNOPSIS
 
