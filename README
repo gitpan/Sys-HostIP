@@ -2,7 +2,7 @@ NAME
     Sys::HostIP - Try extra hard to get IP address related info
 
 VERSION
-    version 1.95
+    version 1.96
 
 SYNOPSIS
         use Sys::HostIP;
@@ -62,7 +62,7 @@ METHODS
 
         foreach my $interface ( keys %{$interfaces} ) {
             my $ip = $interfaces->{$interface};
-            print "$interface => $ip"\n";
+            print "$interface => $ip\n";
         }
 
     Returns a hash ref containing all pairs of interfaces and their

@@ -2,7 +2,7 @@ use strict;
 use warnings;
 package Sys::HostIP;
 {
-  $Sys::HostIP::VERSION = '1.95';
+  $Sys::HostIP::VERSION = '1.96';
 }
 # ABSTRACT: Try extra hard to get IP address related info
 
@@ -280,7 +280,7 @@ sub _get_win32_interface_info {
 
 1;
 
-
+__END__
 
 =pod
 
@@ -290,7 +290,7 @@ Sys::HostIP - Try extra hard to get IP address related info
 
 =head1 VERSION
 
-version 1.95
+version 1.96
 
 =head1 SYNOPSIS
 
@@ -357,7 +357,7 @@ Returns an array ref containing all the IP addresses of your machine.
 
     foreach my $interface ( keys %{$interfaces} ) {
         my $ip = $interfaces->{$interface};
-        print "$interface => $ip"\n";
+        print "$interface => $ip\n";
     }
 
 Returns a hash ref containing all pairs of interfaces and their corresponding
@@ -435,7 +435,3 @@ This is free software; you can redistribute it and/or modify it under
 the same terms as the Perl 5 programming language system itself.
 
 =cut
-
-
-__END__
-
