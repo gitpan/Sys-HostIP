@@ -2,7 +2,7 @@ use strict;
 use warnings;
 package Sys::HostIP;
 {
-  $Sys::HostIP::VERSION = '1.96';
+  $Sys::HostIP::VERSION = '1.97';
 }
 # ABSTRACT: Try extra hard to get IP address related info
 
@@ -118,8 +118,10 @@ sub _get_ifconfig_binary {
         $ifconfig =  '/sbin/ifconfig -a';
     } elsif ( $^O eq 'aix' ) {
         $ifconfig = '/usr/sbin/ifconfig -a';
-    } elsif  ( $^O eq 'irix' ) {
+    } elsif ( $^O eq 'irix' ) {
         $ifconfig = '/usr/etc/ifconfig';
+    } elsif ( $^O eq 'dec_osf' ) {
+        $ifconfig = '/sbin/ifconfig';
     } else {
         carp "Unknown system ($^O), guessing ifconfig is in /sbin/ifconfig " .
              "(email xsawyerx\@cpan.org with the location of your ifconfig)\n";
@@ -290,7 +292,7 @@ Sys::HostIP - Try extra hard to get IP address related info
 
 =head1 VERSION
 
-version 1.96
+version 1.97
 
 =head1 SYNOPSIS
 
